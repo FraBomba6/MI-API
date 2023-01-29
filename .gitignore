@@ -33,6 +33,11 @@
 
 # CLion
 .idea
+cmake*
+CMakeLists.txt
 
 # MacOS
 .DS_Store
+
+# mlpack
+mlpack

@@ -33,8 +33,7 @@
 
 # CLion
 .idea
-cmake*
-CMakeLists.txt
+cmake-build-debug
 
 # MacOS
 .DS_Store

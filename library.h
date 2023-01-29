@@ -1,0 +1,8 @@
+#ifndef SMALL_PROJECT_LIBRARY_H
+#define SMALL_PROJECT_LIBRARY_H
+
+void hello();
+
+
+
+#endif //SMALL_PROJECT_LIBRARY_H

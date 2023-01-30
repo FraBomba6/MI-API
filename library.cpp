@@ -1,35 +1,53 @@
 #include "library.h"
-#include "mlpack/core.hpp"
 #include "mlpack/methods/neighbor_search/neighbor_search.hpp"
+#include <boost/math/special_functions/digamma.hpp>
 
 using namespace arma;
 using namespace std;
 using namespace mlpack;
-
-#include <iostream>
-
-void hello() {
-    std::cout << "Hello, World!" << std::endl;
-}
+using namespace boost::math;
 
 GKOVEstimator::GKOVEstimator(double (*callback)(int)) {
     t_n_ = callback;
 }
 
+/*
+ * Estimate the Mutual Information between X and Y following the method described in https://ia.cr/2022/1201
+ * @param X - X values
+ * @param Y - Y values
+ * @param sizeOfX - size of X
+ * @param sizeOfY - size of Y
+ * @return estimation of Mutual Information between X and Y
+ */
 double GKOVEstimator::estimate(double *X, double **Y, int sizeOfX, pair<int, int> sizeOfY) {
-    size_t t = int(t_n_(sizeOfX));
-    mat data = prepare_data(X, Y, sizeOfX, sizeOfY);
-    data = data.t();
-    NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, VPTree> nn = prepare_search(data);
+    size_t t = int(t_n(sizeOfX));
+    mat xy_data = prepare_data(X, Y, sizeOfX, sizeOfY);
+    xy_data = xy_data.t();
+    mat x_data = xy_data.submat(0, 0, 0, xy_data.n_cols - 1);
+    mat y_data = xy_data.submat(1, 0, xy_data.n_rows - 1, xy_data.n_cols - 1);
+    NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, VPTree> xy = prepare_search(xy_data);
+    NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, VPTree> x = prepare_search(x_data);
+    NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, VPTree> y = prepare_search(y_data);
     Mat<size_t> neighbors;
     mat distances;
     vec d_ixy = zeros(sizeOfX);
     vec d_i = zeros(sizeOfX);
+    vec n_ix = zeros(sizeOfX);
+    vec n_iy = zeros(sizeOfX);
+    vec a_i = zeros(sizeOfX);
     for (int i = 0; i < sizeOfX; i++) {
-        mat x = data.row(i);
-        nn.Search(data.col(i),sizeOfX, neighbors, distances);
+        xy.Search(xy_data.col(i), sizeOfX, neighbors, distances);
         d_ixy[i] = distances(t);
-        ufind(distances == 0);
+        if (d_ixy[i] == 0)
+            d_i[i] = ((uvec)find(distances == 0)).n_elem;
+        else
+            d_i[i] = t;
+        x.Search(x_data.col(i), sizeOfX, neighbors, distances);
+        n_ix[i] = ((uvec)find(distances <= d_i[i])).n_elem;
+        y.Search(y_data.col(i),sizeOfX, neighbors, distances);
+        n_iy[i] = ((uvec)find(distances <= d_i[i])).n_elem;
+        a_i[i] = digamma(d_i[i]) - log(n_ix[i] + 1) - log(n_iy[i] + 1);
+        return sum(a_i)/sizeOfX + log(sizeOfX);
     }
 
 }

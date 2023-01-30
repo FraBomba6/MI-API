@@ -40,3 +40,6 @@ cmake-build-debug
 
 # mlpack
 mlpack
+
+# Python
+*.py

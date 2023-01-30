@@ -1,8 +1,10 @@
 #include "library.h"
 #include "mlpack/core.hpp"
+#include "mlpack/methods/neighbor_search/neighbor_search.hpp"
 
 using namespace arma;
 using namespace std;
+using namespace mlpack;
 
 #include <iostream>
 
@@ -12,6 +14,24 @@ void hello() {
 
 GKOVEstimator::GKOVEstimator(double (*callback)(int)) {
     t_n_ = callback;
+}
+
+double GKOVEstimator::estimate(double *X, double **Y, int sizeOfX, pair<int, int> sizeOfY) {
+    size_t t = int(t_n_(sizeOfX));
+    mat data = prepare_data(X, Y, sizeOfX, sizeOfY);
+    data = data.t();
+    NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, VPTree> nn = prepare_search(data);
+    Mat<size_t> neighbors;
+    mat distances;
+    vec d_ixy = zeros(sizeOfX);
+    vec d_i = zeros(sizeOfX);
+    for (int i = 0; i < sizeOfX; i++) {
+        mat x = data.row(i);
+        nn.Search(data.col(i),sizeOfX, neighbors, distances);
+        d_ixy[i] = distances(t);
+        ufind(distances == 0);
+    }
+
 }
 
 double GKOVEstimator::t_n(int n) {
@@ -42,12 +62,19 @@ mat GKOVEstimator::prepare_data(double* X, double** Y, int sizeOfX, pair<int, in
  * @param sizeOfY - size of Y
  * @return true if dimensions are correct, otherwise raise an exception
  */
-bool GKOVEstimator::check_dimensions(int sizeOfX,  pair<int, int> sizeOfY) {
+void GKOVEstimator::check_dimensions(int sizeOfX,  pair<int, int> sizeOfY) {
     if (sizeOfX <= 0) {
         throw std::invalid_argument("Size of X must be greater than 0.");
     }
-    if (sizeOfY <= 0) {
-        throw std::invalid_argument("Size of Y must be greater than 0.");
+    if (sizeOfY.first <= 0 || sizeOfY.second <= 0) {
+        throw std::invalid_argument("Sizes of Y must be greater than 0.");
     }
-    return sizeOfX > 0 && sizeOfY > 0;
+    if (sizeOfX != sizeOfY.first) {
+        throw std::invalid_argument("Size of X must be equal to first size of Y.");
+    }
+}
+
+NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, VPTree> GKOVEstimator::prepare_search(mat data) {
+    NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, VPTree> search(data);
+    return search;
 }

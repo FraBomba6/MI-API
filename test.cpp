@@ -1,6 +1,6 @@
 #include <cmath>
 #include <cstdio>
-#include "library.h"
+#include "gkov.h"
 
 int main() {
     GKOVEstimator estimator(log);

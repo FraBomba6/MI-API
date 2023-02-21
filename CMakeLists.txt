@@ -5,7 +5,7 @@ project(small_project)
 
 set(CMAKE_CXX_STANDARD 23)
 
-add_library(small_project library.cpp)
+add_library(small_project gkov.cpp gkov.h)
 add_executable(test test.cpp)
 target_link_libraries(test small_project)
 

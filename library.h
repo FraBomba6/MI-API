@@ -8,8 +8,6 @@ using namespace arma;
 using namespace std;
 using namespace mlpack;
 
-void hello();
-
 class GKOVEstimator {
     public:
         explicit GKOVEstimator(double (*callback)(int));

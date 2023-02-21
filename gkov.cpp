@@ -1,4 +1,4 @@
-#include "library.h"
+#include "gkov.h"
 #include "mlpack/methods/neighbor_search/neighbor_search.hpp"
 #include <boost/math/special_functions/digamma.hpp>
 

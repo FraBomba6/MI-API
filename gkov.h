@@ -1,5 +1,5 @@
-#ifndef SMALL_PROJECT_LIBRARY_H
-#define SMALL_PROJECT_LIBRARY_H
+#ifndef GKOV_LIBRARY_H
+#define GKOV_LIBRARY_H
 
 #include <mlpack/core.hpp>
 #include <mlpack/methods/neighbor_search/neighbor_search.hpp>

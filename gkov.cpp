@@ -1,5 +1,4 @@
 #include "gkov.h"
-#include "mlpack/methods/neighbor_search/neighbor_search.hpp"
 #include <boost/math/special_functions/digamma.hpp>
 
 using namespace arma;
@@ -47,9 +46,8 @@ double GKOVEstimator::estimate(double *X, double **Y, int sizeOfX, pair<int, int
         y.Search(y_data.col(i),sizeOfX, neighbors, distances);
         n_iy[i] = ((uvec)find(distances <= d_i[i])).n_elem;
         a_i[i] = digamma(d_i[i]) - log(n_ix[i] + 1) - log(n_iy[i] + 1);
-        return sum(a_i)/sizeOfX + log(sizeOfX);
     }
-
+    return sum(a_i)/sizeOfX + log(sizeOfX);
 }
 
 double GKOVEstimator::t_n(int n) {

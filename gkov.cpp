@@ -18,7 +18,7 @@ GKOVEstimator::GKOVEstimator(double (*callback)(int)) {
  * @param sizeOfY - size of Y
  * @return estimation of Mutual Information between X and Y
  */
-double GKOVEstimator::estimate(double *X, double **Y, int sizeOfX, pair<int, int> sizeOfY) {
+double GKOVEstimator::estimate(double *X, double ***Y, int sizeOfX, int sizeOfY[3]) {
     size_t t = int(t_n(sizeOfX));
     mat xy_data = prepare_data(X, Y, sizeOfX, sizeOfY);
     xy_data = xy_data.t();
@@ -62,13 +62,14 @@ double GKOVEstimator::t_n(int n) {
  * @param sizeOfY - size of Y
  * @return data for estimation as arma::mat
  */
-mat GKOVEstimator::prepare_data(double* X, double** Y, int sizeOfX, pair<int, int> sizeOfY) {
+mat GKOVEstimator::prepare_data(double* X, double*** Y, int sizeOfX, int sizeOfY[3]) {
     check_dimensions(sizeOfX, sizeOfY);
-    mat data(sizeOfX, sizeOfY.second + 1);
+    mat data(sizeOfX, sizeOfY[1] * sizeOfY[2] + 1);
     data.col(0) = vec(X, sizeOfX);
-    for (int i = 0; i < sizeOfY.second; i++) {
-        data.col(i + 1) = vec(Y[i], sizeOfX);
-    }
+    for (int i = 0; i < sizeOfY[0]; i++)
+        for (int j = 0; j < sizeOfY[1]; j++)
+            for (int k = 0; k < sizeOfY[2]; k++)
+                data(i, sizeOfY[1] * j + k + 1) = Y[i][j][k];
     return data;
 }
 
@@ -78,14 +79,14 @@ mat GKOVEstimator::prepare_data(double* X, double** Y, int sizeOfX, pair<int, in
  * @param sizeOfY - size of Y
  * @return true if dimensions are correct, otherwise raise an exception
  */
-void GKOVEstimator::check_dimensions(int sizeOfX,  pair<int, int> sizeOfY) {
+void GKOVEstimator::check_dimensions(const int sizeOfX, const int sizeOfY[3]) {
     if (sizeOfX <= 0) {
         throw std::invalid_argument("Size of X must be greater than 0.");
     }
-    if (sizeOfY.first <= 0 || sizeOfY.second <= 0) {
+    if (sizeOfY[0] <= 0 || sizeOfY[1] <= 0 || sizeOfY[2] <= 0) {
         throw std::invalid_argument("Sizes of Y must be greater than 0.");
     }
-    if (sizeOfX != sizeOfY.first) {
+    if (sizeOfX != sizeOfY[0]) {
         throw std::invalid_argument("Size of X must be equal to first size of Y.");
     }
 }

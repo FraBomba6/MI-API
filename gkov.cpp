@@ -74,10 +74,10 @@ mat GKOVEstimator::prepare_data(double* X, double*** Y, int sizeOfX, int sizeOfY
 }
 
 /*
- * Check if dimensions are correct.
+ * Check if histDimensions are correct.
  * @param sizeOfX - size of X
  * @param sizeOfY - size of Y
- * @return true if dimensions are correct, otherwise raise an exception
+ * @return true if histDimensions are correct, otherwise raise an exception
  */
 void GKOVEstimator::check_dimensions(const int sizeOfX, const int sizeOfY[3]) {
     if (sizeOfX <= 0) {

@@ -7,19 +7,24 @@ using namespace std;
 
 class HistEstimator {
 public:
-    explicit HistEstimator(int dimensions ,int bins[dimensions], double rangeMin, double rangeMax);
-    double estimate(double* X, int dimensions, int size, const int sizes[dimensions]);
+    HistEstimator(int dimensions, int bins[dimensions], pair<double, double> ranges[dimensions]);
+    double estimate(double *X, double *pX, double **Y, int size, int dimensions);
 private:
-    int histDimensions;
-    int* bins;
-    int numberOfBins;
-    pair<double, double> ranges;
-    int sizeOfHistogram;
+    int histogramDimensions;
+    int* numOfBinsPerDimension;
+    int totalBins;
+    int sumOfBins;
     pair<double, double>* rangesPerDimension;
-    void generate_uniform_ranges();
-    int* build_histogram(double* X, int dimensions, int size, const int sizes[dimensions]) const;
-    int get_index(int* indexes);
-    static void check_dimensions(int dimensions, int size, const int sizes[dimensions]);
+    void generate_uniform_ranges(pair<double, double> *ranges);
+    static double pdf_entropy(const double* pdf, int size) ;
+    static pair<double *, int> unique(double* X, int size) ;
+    double conditional_entropy(double *X, double *pX, double **Y, pair<int *, double *> histogram, int size);
+    pair<int*, double*> build_histogram(double **Y, int size, int dimensions);
+    [[nodiscard]] pair<int*, double*> initialize_histogram() const;
+    void increment(int* histogram, double* values);
+    int get_bin_index(double *value);
+    void compute_pdf(pair<int *, double *> histogram, int size) const;
+    void check_dimensions(int size, int dimensions) const;
 };
 
 #endif

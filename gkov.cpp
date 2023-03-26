@@ -6,11 +6,15 @@ using namespace std;
 using namespace mlpack;
 using namespace boost::math;
 
+/**
+ * Constructor for GKOVEstimator
+ * @param callback function to compute t_n
+ */
 GKOVEstimator::GKOVEstimator(double (*callback)(int)) {
     t_n_ = callback;
 }
 
-/*
+/**
  * Estimate the Mutual Information between X and Y following the method described in https://ia.cr/2022/1201
  * @param X - X values
  * @param Y - Y values
@@ -50,11 +54,16 @@ double GKOVEstimator::estimate(double *X, double ***Y, int sizeOfX, int sizeOfY[
     return sum(a_i)/sizeOfX + log(sizeOfX);
 }
 
+/**
+ * Computes the t_n value for the given n.
+ * @param n - length of the dataset
+ * @return t_n value
+ */
 double GKOVEstimator::t_n(int n) {
     return t_n_(n);
 }
 
-/*
+/**
  * Prepare data for estimation.
  * @param X - X values
  * @param Y - Y values
@@ -73,11 +82,11 @@ mat GKOVEstimator::prepare_data(double* X, double*** Y, int sizeOfX, int sizeOfY
     return data;
 }
 
-/*
- * Check if histDimensions are correct.
+/**
+ * Check if histogramDimensions are correct.
  * @param sizeOfX - size of X
  * @param sizeOfY - size of Y
- * @return true if histDimensions are correct, otherwise raise an exception
+ * @return true if histogramDimensions are correct, otherwise raise an exception
  */
 void GKOVEstimator::check_dimensions(const int sizeOfX, const int sizeOfY[3]) {
     if (sizeOfX <= 0) {

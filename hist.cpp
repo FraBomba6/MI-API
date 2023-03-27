@@ -5,9 +5,9 @@
 
 /**
  * Constructor for the HistEstimator class.
- * @param dimensions The number of dimensions of the histogram.
- * @param bins Array containing the number of bins per dimension.
- * @param ranges Array of ranges, one for each dimension of the histogram as pair representing min and max.
+ * @param dimensions - The number of dimensions of the histogram.
+ * @param bins - Array containing the number of bins per dimension.
+ * @param ranges - Array of ranges, one for each dimension of the histogram as pair representing min and max.
  * @return A HistEstimator object.
  */
 HistEstimator::HistEstimator(int dimensions, int bins[dimensions], pair<double, double> ranges[dimensions]) {
@@ -25,7 +25,7 @@ HistEstimator::HistEstimator(int dimensions, int bins[dimensions], pair<double, 
 
 /**
  * Generates the ranges of the histogram.
- * @param ranges Array of ranges, one for each dimension of the histogram as pair representing min and max.
+ * @param ranges - Array of ranges, one for each dimension of the histogram as pair representing min and max.
  */
 void HistEstimator::generate_uniform_ranges(pair<double, double> *ranges) {
     int offset = 0;
@@ -41,7 +41,7 @@ void HistEstimator::generate_uniform_ranges(pair<double, double> *ranges) {
 
 /**
  * Convert a multidimensional values array to a unidimensional index corresponding to a bin of the histogram.
- * @param value The multidimensional array of values.
+ * @param value - The multidimensional array of values.
  * @return The index of the bin to access.
  */
 int HistEstimator::get_bin_index(double *value) {
@@ -64,8 +64,8 @@ int HistEstimator::get_bin_index(double *value) {
 
 /**
  * Compute the entropy of a probability density function.
- * @param pdf An array containing the probability density function.
- * @param size The size of the array.
+ * @param pdf - An array containing the probability density function.
+ * @param size - The size of the array.
  * @return The entropy of the probability density function.
  */
 double HistEstimator::pdf_entropy(const double *pdf, int size) {
@@ -79,8 +79,9 @@ double HistEstimator::pdf_entropy(const double *pdf, int size) {
 
 /**
  * Compute a new array containing the unique values of the input array.
- * @param X 1D array containing size data points.
- * @param size The number of data points.
+ * @param X - 1D array containing size data points.
+ * @param size - The number of data points.
+ * @return A pair containing the unique values array and its size.
  */
 pair<double*, int> HistEstimator::unique(double *X, int size) {
     auto* sorted = new double[size];
@@ -101,12 +102,12 @@ pair<double*, int> HistEstimator::unique(double *X, int size) {
 
 /**
  * Compute the conditional entropy between a discrete random variable and a continuous random variable.
- * @param histogram The histogram of the continuous random variable.
- * @param X 1D array containing size data points.
- * @param pX 1D array containing the probability of each unique value of X sorted in the same order as unique(X).
- * @param Y 2D array containing size data points where each data point is an array of values of length dimensions (one for each dimension).
- * @param size The number of data points.
- * @param dimensions The number of dimensions of the data.
+ * @param histogram - The histogram of the continuous random variable.
+ * @param X - 1D array containing size data points.
+ * @param pX - 1D array containing the probability of each unique value of X sorted in the same order as unique(X).
+ * @param Y - 2D array containing size data points where each data point is an array of values of length dimensions (one for each dimension).
+ * @param size - The number of data points.
+ * @param dimensions - The number of dimensions of the data.
  * @return The conditional entropy between X and Y.
  */
 double
@@ -128,10 +129,10 @@ HistEstimator::conditional_entropy(double *X, double *pX, double **Y, pair<int *
 
 /**
  * Computes the mutual information between a discrete random variable and a continuous random variable.
- * @param X 1D array containing size data points.
- * @param Y 2D array containing size data points where each data point is an array of values of length dimensions (one for each dimension).
- * @param size The number of data points.
- * @param dimensions The number of dimensions of the data.
+ * @param X - 1D array containing size data points.
+ * @param Y - 2D array containing size data points where each data point is an array of values of length dimensions (one for each dimension).
+ * @param size - The number of data points.
+ * @param dimensions - The number of dimensions of the data.
  * @return The mutual information between X and Y.
  */
 double HistEstimator::estimate(double *X, double *pX, double **Y, const int size, const int dimensions) {
@@ -156,8 +157,8 @@ pair<int*, double*> HistEstimator::initialize_histogram() const {
 
 /**
  * Increments the histogram given the values of the data point.
- * @param histogram The histogram.
- * @param values The values of the data point.
+ * @param histogram - The histogram.
+ * @param values - The values of the data point.
  */
 void HistEstimator::increment(int *histogram, double *values) {
     int binIndex = get_bin_index(values);
@@ -166,7 +167,7 @@ void HistEstimator::increment(int *histogram, double *values) {
 
 /**
  * Computes the pdf of the histogram.
- * @param histogram The histogram.
+ * @param histogram - The histogram.
  */
 void HistEstimator::compute_pdf(pair<int *, double *> histogram, int size) const {
     for (int i = 0; i < this->totalBins; i++)
@@ -175,9 +176,9 @@ void HistEstimator::compute_pdf(pair<int *, double *> histogram, int size) const
 
 /**
  * Builds the histogram.
- * @param Y 2D array containing size data points where each data point is an array of values of length dimensions (one for each dimension).
- * @param size The number of data points.
- * @param dimensions The number of dimensions of the data.
+ * @param Y - 2D array containing size data points where each data point is an array of values of length dimensions (one for each dimension).
+ * @param size - The number of data points.
+ * @param dimensions - The number of dimensions of the data.
  * @return A pair containing the histogram and the pdf.
  */
 pair<int*, double*> HistEstimator::build_histogram(double **Y, const int size, const int dimensions) {
@@ -190,8 +191,8 @@ pair<int*, double*> HistEstimator::build_histogram(double **Y, const int size, c
 
 /**
  * Checks if the dimensions of the data are correct.
- * @param size The number of data points.
- * @param dimensions The number of dimensions of the data.
+ * @param size - The number of data points.
+ * @param dimensions - The number of dimensions of the data.
  * @throws invalid_argument if the dimensions of the data are not correct.
  * @throws invalid_argument if the dimensions of the histogram and the data do not match.
  */

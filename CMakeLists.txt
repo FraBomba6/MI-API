@@ -7,8 +7,9 @@ set(CMAKE_CXX_STANDARD 23)
 
 add_library(gkov gkov.cpp gkov.h)
 add_library(hist hist.cpp hist.h)
+add_library(utils utils.cpp utils.h)
 add_executable(test test.cpp)
-target_link_libraries(test gkov hist)
+target_link_libraries(test gkov hist utils)
 
 find_package(MLPACK REQUIRED)
 include_directories(${MLPACK_INCLUDE_DIRS})

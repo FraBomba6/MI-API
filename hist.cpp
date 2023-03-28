@@ -24,6 +24,22 @@ HistEstimator::HistEstimator(int dimensions, int bins[dimensions], pair<double, 
 }
 
 /**
+ * Computes the mutual information between a discrete random variable and a continuous random variable.
+ * @param X - 1D array containing size data points.
+ * @param Y - 2D array containing size data points where each data point is an array of values of length dimensions (one for each dimension).
+ * @param size - The number of data points.
+ * @param dimensions - The number of dimensions of the data.
+ * @return The mutual information between X and Y.
+ */
+double HistEstimator::estimate(double *X, double *pX, double **Y, const int size, const int dimensions) {
+    check_dimensions(size, dimensions);
+    auto histogram = build_histogram(Y, size, dimensions);
+    double H_Y = pdf_entropy(histogram.second, this->totalBins);
+    double H_Y_given_X = conditional_entropy(X, pX, Y, histogram, size);
+    return H_Y - H_Y_given_X;
+}
+
+/**
  * Generates the ranges of the histogram.
  * @param ranges - Array of ranges, one for each dimension of the histogram as pair representing min and max.
  */
@@ -125,22 +141,6 @@ HistEstimator::conditional_entropy(double *X, double *pX, double **Y, pair<int *
         entropy += pX[i] * (-stepEntropy);
     }
     return entropy;
-}
-
-/**
- * Computes the mutual information between a discrete random variable and a continuous random variable.
- * @param X - 1D array containing size data points.
- * @param Y - 2D array containing size data points where each data point is an array of values of length dimensions (one for each dimension).
- * @param size - The number of data points.
- * @param dimensions - The number of dimensions of the data.
- * @return The mutual information between X and Y.
- */
-double HistEstimator::estimate(double *X, double *pX, double **Y, const int size, const int dimensions) {
-    check_dimensions(size, dimensions);
-    auto histogram = build_histogram(Y, size, dimensions);
-    double H_Y = pdf_entropy(histogram.second, this->totalBins);
-    double H_Y_given_X = conditional_entropy(X, pX, Y, histogram, size);
-    return H_Y - H_Y_given_X;
 }
 
 /**

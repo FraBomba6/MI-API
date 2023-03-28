@@ -21,8 +21,14 @@ void MIUtils::flatten(double* X, int* sizes, int dimensions, double* flattened, 
     }
 }
 
-/* Converts a multidimensional array to the format required by the GKOV estimator by keeping the first dimension and flattening the rest */
-double* MIUtils::to_gkov_format(double *X, int* sizes, int dimensions) {
+/**
+ * Converts a multidimensional array to a format compatible with the GKOV estimator library.
+ * @param X - The multidimensional array.
+ * @param sizes - The sizes of each dimension.
+ * @param dimensions - The number of dimensions.
+ * @return The converted array.
+ */
+double** MIUtils::to_gkov_format(double *X, int* sizes, int dimensions) {
     auto** X_gkov = new double*[sizes[0]];
     int flattenedSize = 1;
     for (int i = 1; i < dimensions; i++)
@@ -31,7 +37,6 @@ double* MIUtils::to_gkov_format(double *X, int* sizes, int dimensions) {
         auto* flattened = new double[flattenedSize];
         flatten(X + i * flattenedSize, sizes + 1, dimensions - 1, flattened, 0);
         X_gkov[i] = flattened;
-        delete[] flattened;
     }
-    return *X_gkov;
+    return X_gkov;
 }

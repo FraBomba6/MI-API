@@ -28,7 +28,7 @@ void MIUtils::flatten(double* X, int* sizes, int dimensions, double* flattened, 
  * @param dimensions - The number of dimensions.
  * @return The converted array.
  */
-double** MIUtils::to_gkov_format(double *X, int* sizes, int dimensions) {
+[[maybe_unused]] double** MIUtils::to_gkov_format(double *X, int* sizes, int dimensions) {
     auto** X_gkov = new double*[sizes[0]];
     int flattenedSize = 1;
     for (int i = 1; i < dimensions; i++)

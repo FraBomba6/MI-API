@@ -41,5 +41,5 @@ cmake-build*
 # mlpack
 mlpack
 
-# Python
-*.py
+# HDF5
+*.h5

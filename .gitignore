@@ -46,3 +46,7 @@ mlpack
 
 # Data
 data
+
+# Latex build
+report/build
+report/template.tex

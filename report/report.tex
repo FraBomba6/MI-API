@@ -109,7 +109,14 @@ colback=black!5!white, colframe=black!75!white,fonttitle=\bfseries, title = #1}
     where $\psi$ is the digamma function.
 
     \section{Project Execution}\label{sec:execution}
-    The project aimed
+    The project aimed to develop a C++ API for the GKOV estimator, the histogram estimator, and a simulator for the leakage of a device.
+    All the code was written in C++ and using an OO approach.
+
+    \subsection{GKOV estimator}\label{subsec:gkov_impl}
+    The GKOV estimator was implemented as described in~\cite{gkov}.
+    The implementation is based on the class \texttt{GKOVEstimator} which is initialized with the callback function to compute the value $t_n$ as described in~\cite{roy_leakage_2022}.
+
+
     \newpage
     \bibliography{references}
     \bibliographystyle{acm}

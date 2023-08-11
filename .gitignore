@@ -43,3 +43,6 @@ mlpack
 
 # HDF5
 *.h5
+
+# Data
+data

@@ -91,7 +91,6 @@ colback=black!5!white, colframe=black!75!white,fonttitle=\bfseries, title = #1}
 
     \subsection{Histogram estimator}\label{subsec:hist}
     The histogram estimator is a method for estimating the MI between two random variables $X$ and $Y$.
-    This approach is particularly useful when the underlying probability distributions are not known or difficult to model analytically.
     The core idea behind the histogram estimator is to discretize the continuous random variables into bins and then compute the mutual information based on the joint and marginal frequencies of these bins.
     The MI between $X$ and $Y$ is then estimated as:
     \begin{equation}
@@ -115,8 +114,47 @@ colback=black!5!white, colframe=black!75!white,fonttitle=\bfseries, title = #1}
     \subsection{GKOV estimator}\label{subsec:gkov_impl}
     The GKOV estimator was implemented as described in~\cite{gkov}.
     The implementation is based on the class \texttt{GKOVEstimator} which is initialized with the callback function to compute the value $t_n$ as described in~\cite{roy_leakage_2022}.
+    The class \texttt{GKOVEstimator} provides the method \texttt{estimate} which takes as input the discrete variable $X$, the continuous variable $Y$, and the dimension of the two variables.
+    The method \texttt{estimate} returns the estimated MI between $X$ and $Y$.
+    Under the hood, the method \texttt{estimate} computes the value $t$, builds the matrix data starting from the discrete and continuous variables, builds the search trees for the two single variables and the combined matrix, and finally computes the GKOV estimator as described in~\cite{roy_leakage_2022}.
 
+    \subsection{Histogram estimator}\label{subsec:hist_impl}
+    The histogram estimator was implemented to be used as a baseline for comparing the GKOV estimator.
+    Following the description in Section~\ref{subsec:hist}, the histogram estimator was implemented as a class \texttt{HistogramEstimator}.
+    The class \texttt{HistogramEstimator} is initialized with the number of dimensions of the continuous variable $Y$, the number of bins for each dimension, and the ranges of the bins.
+    The underlying assumption about the ranges is that the bins are equally spaced.
+    The class \texttt{HistogramEstimator} provides the method \texttt{estimate} which takes as input the discrete variable $X$, its probability distribution, the continuous variable $Y$, the size of the two variables and the dimension of the $Y$ variable.
 
+    The method \texttt{estimate} makes usage of the methods \texttt{build\_histogram}, \texttt{pdf\_entropy}, and \texttt{conditional\_entropy} to compute the MI between $X$ and $Y$.
+    \texttt{build\_histogram} builds histogram of $Y$ based on the dimensions of the variable and computes the pdf of the histogram.
+    To ensure the efficiency of the histogram estimator, the method makes usage of the GSL library~\cite{gsl} for building the 1D and 2D histograms.
+    The method \texttt{pdf\_entropy} computes the entropy of the pdf of $Y$.
+    The method \texttt{conditional\_entropy} computes the conditional entropy of $Y$ given $X$.
+    Finally, the method \texttt{estimate} returns the MI between $X$ and $Y$ computed as described in equation~\ref{eq:hist}.
+
+    \subsection{Simulator}\label{subsec:sim}
+    The simulator was implemented to provide a way to test the GKOV estimator and the histogram estimator.
+    This class has the purpose of simulating the leakage of a device using the following model:
+    \begin{equation}
+        \text{leakage} = \text{leakage\_function}(\text{crypto\_function}(key, \text{plaintext})) + \text{noise}\label{eq:sim}
+    \end{equation}
+    where \texttt{leakage\_function} is the function that simulates the leakage of the device, \texttt{crypto\_function} is the function that simulates the cryptographic function of the device, and \texttt{noise} is the noise added to the leakage.
+    At time of writing, the simulator supports gaussian and laplacian noise distributions but the code was made to be easily extensible to other distributions.
+    Instead, the cryptographic function is passed as argument of the methods of the simulator.
+
+    Regarding the type of trace that can be simulated, the simulator supports one dimensional traces.
+
+    Finally, the simulator saves the simulated traces in a HDF5 file to allow the user to use the traces for further analysis.
+
+    \subsection{Utilities}\label{subsec:utils}
+    The project provides a class that implements some utilities used by the other classes in the project.
+
+    In particular, the class \texttt{Utils} provides the methods:
+    \begin{itemize}
+        \item \texttt{flatten} and \texttt{to\_gkov\_format} to convert an n-dimensional array to, respectively, a 1-dimensional array and a 2-dimensional array;
+        \item \texttt{compute\_distribution} to compute the distribution of a discrete variable;
+        \item \texttt{read\_traces} and \texttt{write\_traces} to read and write traces from and to a HDF5 file.
+    \end{itemize}
     \newpage
     \bibliography{references}
     \bibliographystyle{acm}

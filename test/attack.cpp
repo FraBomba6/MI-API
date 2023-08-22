@@ -53,17 +53,32 @@ int main() {
             // Read the traces
             Trace trace = MIUtils::read_traces(entry.path());
             int dims[2] = {(int) trace.dims[0], (int) trace.dims[1]};
-            auto Y = MIUtils::to_gkov_format(trace.traces, dims, 2);
+            auto Y_gkov = MIUtils::to_gkov_format(trace.traces, dims, 2);
+            auto Y_hist = new double[dims[0] * dims[1]];
+            MIUtils::flatten(trace.traces, dims, 2, Y_hist, 0);
+            // Find min and max values of Y_hist
+            double min = Y_hist[0];
+            double max = Y_hist[0];
+            for (int i = 1; i < dims[0] * dims[1]; i++) {
+                if (Y_hist[i] < min)
+                    min = Y_hist[i];
+                if (Y_hist[i] > max)
+                    max = Y_hist[i];
+            }
+            int bins[1] = {10};
+            pair<double, double> ranges[1] = {make_pair(min, max)};
+            double pX[9] = {1.0/256, 8.0/256, 28.0/256, 56.0/256, 70.0/256, 56.0/256, 28.0/256, 8.0/256, 1.0/256};
 
-            auto estimator = GKOVEstimator(log10);
+            auto gkov_estimator = GKOVEstimator(log10);
+            auto hist_estimator = HistEstimator(1, bins, ranges);
             // Compute the GKOV estimate
             for (int i = 0; i < 256; i++) {
                 auto X = new double[dims[0]];
                 for (int j = 0; j < dims[0]; j++) {
                     X[j] = hw(aes_intermediate((int) trace.pts[j], i));
                 }
-                double estimate = estimator.estimate(X, Y, dims[0], dims);
-                cout << "GKOV estimate for " << i << ": " << estimate << endl;
+                // double gkov_estimate = gkov_estimator.estimate(X, Y_gkov, dims[0], dims);
+                double hist_estimate = hist_estimator.estimate(X, pX, Y_hist, dims[0], 1);
             }
         }
     }

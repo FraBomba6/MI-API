@@ -55,7 +55,7 @@ Histogram *HistEstimator::build_histogram(double *Y, int size, int dimensions) {
  */
 Histogram *HistEstimator::initialize_histogram() const {
     auto *histogram = new Histogram;
-    histogram->histogram = nullptr;
+    histogram->histogram = new int[this->totalBins];
     histogram->gsl_histogram = nullptr;
     histogram->gsl_histogram2d = nullptr;
     histogram->pdf = new double[this->totalBins];
@@ -207,7 +207,7 @@ double HistEstimator::conditional_entropy(const double *X, const double *pX, con
                 stepEntropy += histogram->pdf[bin_index] * log2(histogram->pdf[bin_index]);
             }
         }
-        entropy += pX[i] * (-stepEntropy);
+        entropy += pX[(int) X[i]] * (-stepEntropy);
     }
     return entropy;
 }

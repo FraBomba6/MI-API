@@ -27,9 +27,9 @@ double GKOVEstimator::estimate(double *X, double **Y, int sizeOfX, int sizeOfY[2
     xy_data = xy_data.t();
     mat x_data = xy_data.submat(0, 0, 0, xy_data.n_cols - 1);
     mat y_data = xy_data.submat(1, 0, xy_data.n_rows - 1, xy_data.n_cols - 1);
-    NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, VPTree> xy = prepare_search(xy_data);
-    NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, VPTree> x = prepare_search(x_data);
-    NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, VPTree> y = prepare_search(y_data);
+    NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, BallTree> xy = prepare_search(xy_data);
+    NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, BallTree> x = prepare_search(x_data);
+    NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, BallTree> y = prepare_search(y_data);
     Mat<size_t> neighbors;
     mat distances;
     vec d_ixy = zeros(sizeOfX);
@@ -98,7 +98,7 @@ void GKOVEstimator::check_dimensions(const int sizeOfX, const int sizeOfY[2]) {
     }
 }
 
-NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, VPTree> GKOVEstimator::prepare_search(mat data) {
-    NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, VPTree> search(data);
+NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, BallTree> GKOVEstimator::prepare_search(mat data) {
+    NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, BallTree> search(data);
     return search;
 }

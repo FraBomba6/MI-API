@@ -23,19 +23,19 @@
 
 \renewcommand{\thepage}{\TotalValue{totalpages}-\arabic{page}}
 \newcommand{\heading}[5]{
-\noindent
-\begin{center}
-	\framebox[\textwidth]{
-	\begin{minipage}{0.9\textwidth} \onehalfspacing
-	{\textbf {#1}}
+    \noindent
+    \begin{center}
+        \framebox[\textwidth]{
+            \begin{minipage}{0.9\textwidth} \onehalfspacing
+            {\textbf {#1}}
 
-	{\centering \Large #5
+            {\centering \Large #5
 
-	}\medskip
-	{#3 \hfill #2 \hfill #4}
-	\end{minipage}
-}
-\end{center}
+            }\medskip
+            {#3 \hfill #2 \hfill #4}
+            \end{minipage}
+        }
+    \end{center}
 }
 
 %**********************************************
@@ -61,16 +61,16 @@
 {}
 
 \newtcolorbox{alert}[1]{
-colback=red!5!white, colframe=red!75!white,fonttitle=\bfseries, title = #1}
+    colback=red!5!white, colframe=red!75!white,fonttitle=\bfseries, title = #1}
 
 \newtcolorbox{commentbox}[1]{
-colback=black!5!white, colframe=black!75!white,fonttitle=\bfseries, title = #1}
+    colback=black!5!white, colframe=black!75!white,fonttitle=\bfseries, title = #1}
 
 \newcommand{\handout}[5]{\heading{#1}{#2}{#3}{#4}{#5}}
 
 \begin{document}
 
-\handout{650.060 - Small Project in Artificial Intelligence and Cybersecurity}{Summer Term 2022/2023}{Francesco Bombassei De Bona}{12138677}{An API for Mutual Information estimation}
+    \handout{650.060 - Small Project in Artificial Intelligence and Cybersecurity}{Summer Term 2022/2023}{Francesco Bombassei De Bona}{12138677}{An API for Mutual Information estimation}
 
     \section{Introduction}\label{sec:intro}
     This project aims to provide a publicly available C++ API for the methodologies introduced in~\cite{roy_leakage_2022} for estimating Mutual Information.
@@ -89,10 +89,21 @@ colback=black!5!white, colframe=black!75!white,fonttitle=\bfseries, title = #1}
     \end{align}
     where $H(X)$ is the entropy of $X$, $H(X|Y)$ is the conditional entropy of $X$ given $Y$ and is defined as \[H(X|Y) = \begin{cases} \sum_y p(y) H(X|Y=y) & \text{if } Y \text{ is discrete} \\ \int_y p(y) H(X|Y=y) dy & \text{if } Y \text{ is continuous} \end{cases}\] and $H(X,Y)$ is the joint entropy of $X$ and $Y$.
 
+    As presented in~\cite{roy_leakage_2022}, it's possible to observe three different cases of MI:
+    \begin{itemize}
+        \item $X$ and $Y$ discrete that leads to the discrete MI;
+        \item $X$ and $Y$ continuous that leads to the continuous MI;
+        \item $X$ discrete and $Y$ continuous that leads to the mixed MI\@.
+    \end{itemize}
+
+    In this work, we focus on the mixed MI case.
+
+    For this case there are two different ways to compute the MI between $X$ and $Y$: using an estimator for the conditional/joint density in combination with the H2 or H3 formulas; or using an estimator based on nearest neighbors search.
+
     \subsection{Histogram estimator}\label{subsec:hist}
     The histogram estimator is a method for estimating the MI between two random variables $X$ and $Y$.
     The core idea behind the histogram estimator is to discretize the continuous random variables into bins and then compute the mutual information based on the joint and marginal frequencies of these bins.
-    The MI between $X$ and $Y$ is then estimated as:
+    The MI between $X$ and $Y$ is then estimated using the H2 equation as:
     \begin{equation}
         I(X;Y) = H(Y) - H(Y|X)\label{eq:hist}
     \end{equation}
@@ -106,6 +117,9 @@ colback=black!5!white, colframe=black!75!white,fonttitle=\bfseries, title = #1}
         I_n(X;Y) = \frac{1}{n} \sum_{i=1}^n \hat{I}_i = \sum_{i=1}^n \left( \psi(\tilde{t}_i) + \log n - \log(n_{x,i}+1) - \log(n_{y,i}+1) \right)\label{eq:gkov}
     \end{equation}
     where $\psi$ is the digamma function.
+
+    \subsection{Motivation}\label{subsec:motivation}
+    As previou
 
     \section{Project Execution}\label{sec:execution}
     The project aimed to develop a C++ API for the GKOV estimator, the histogram estimator, and a simulator for the leakage of a device.

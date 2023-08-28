@@ -46,40 +46,63 @@ unsigned int hw(unsigned int x) {
     return count;
 }
 
-int main() {
-    for (const auto &entry : filesystem::directory_iterator("../data/traces")) {
-        if (entry.path().extension() == ".h5") {
-            cout << "Processing " << entry.path() << endl;
-            // Read the traces
-            Trace trace = MIUtils::read_traces(entry.path());
-            int dims[2] = {(int) trace.dims[0], (int) trace.dims[1]};
-            auto Y_gkov = MIUtils::to_gkov_format(trace.traces, dims, 2);
-            auto Y_hist = new double[dims[0] * dims[1]];
-            MIUtils::flatten(trace.traces, dims, 2, Y_hist, 0);
-            // Find min and max values of Y_hist
-            double min = Y_hist[0];
-            double max = Y_hist[0];
-            for (int i = 1; i < dims[0] * dims[1]; i++) {
-                if (Y_hist[i] < min)
-                    min = Y_hist[i];
-                if (Y_hist[i] > max)
-                    max = Y_hist[i];
-            }
-            int bins[1] = {10};
-            pair<double, double> ranges[1] = {make_pair(min, max)};
-            double pX[9] = {1.0/256, 8.0/256, 28.0/256, 56.0/256, 70.0/256, 56.0/256, 28.0/256, 8.0/256, 1.0/256};
-
-            auto gkov_estimator = GKOVEstimator(log10);
-            auto hist_estimator = HistEstimator(1, bins, ranges);
-            // Compute the GKOV estimate
-            for (int i = 0; i < 256; i++) {
-                auto X = new double[dims[0]];
-                for (int j = 0; j < dims[0]; j++) {
-                    X[j] = hw(aes_intermediate((int) trace.pts[j], i));
-                }
-                // double gkov_estimate = gkov_estimator.estimate(X, Y_gkov, dims[0], dims);
-                double hist_estimate = hist_estimator.estimate(X, pX, Y_hist, dims[0], 1);
-            }
-        }
+int main(int argc, char **argv) {
+    // Read filename from first argument
+    if (argc != 2) {
+        cout << "Usage: ./attack <filename>" << endl;
+        return 1;
     }
+    string filename = argv[1];
+    if (!filesystem::exists(filename)) {
+        cout << "File " << filename << " does not exist" << endl;
+        return 1;
+    }
+    cout << "Processing " << filename << endl;
+    // Read the traces
+    Trace trace = MIUtils::read_traces(filename);
+    int dims[2] = {(int) trace.dims[0], (int) trace.dims[1]};
+    auto Y_gkov = MIUtils::to_gkov_format(trace.traces, dims, 2);
+    auto Y_hist = new double[dims[0] * dims[1]];
+    MIUtils::flatten(trace.traces, dims, 2, Y_hist, 0);
+    // Find min and max values of Y_hist
+    double min = Y_hist[0];
+    double max = Y_hist[0];
+    for (int i = 1; i < dims[0] * dims[1]; i++) {
+        if (Y_hist[i] < min)
+            min = Y_hist[i];
+        if (Y_hist[i] > max)
+            max = Y_hist[i];
+    }
+    int bins[1] = {10};
+    pair<double, double> ranges[1] = {make_pair(min, max)};
+    double pX[9] = {1.0/256, 8.0/256, 28.0/256, 56.0/256, 70.0/256, 56.0/256, 28.0/256, 8.0/256, 1.0/256};
+
+    auto gkov_estimator = GKOVEstimator(log10);
+    auto hist_estimator = HistEstimator(1, bins, ranges);
+
+    // Write everything to a json file
+    ofstream json_file;
+    string json_filename = "../data/results/" + filename.substr(filename.find_last_of('/') + 1, filename.find_last_of('.')) + ".json";
+    json_file.open(json_filename);
+    json_file << "{\n";
+
+    for (int i = 0; i < 256; i++) {
+        auto X = new double[dims[0]];
+        for (int j = 0; j < dims[0]; j++) {
+            X[j] = hw(aes_intermediate((int) trace.pts[j], i));
+        }
+        cout << "Processing key " << i << endl;
+        double gkov_estimate = gkov_estimator.estimate(X, Y_gkov, dims[0], dims);
+        double hist_estimate = hist_estimator.estimate(X, pX, Y_hist, dims[0], 1);
+        json_file << "\t\"" << i << "\": {\n";
+        json_file << "\t\t\"gkov\": " << gkov_estimate << ",\n";
+        json_file << "\t\t\"hist\": " << hist_estimate << "\n";
+        json_file << "\t}";
+        if (i != 255)
+            json_file << ",";
+        json_file << "\n";
+    }
+    json_file << "}";
+    json_file.close();
+    return 0;
 }

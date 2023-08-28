@@ -1,3 +1,5 @@
+#include <utility>
+
 #include "../include/gkov.h"
 
 using namespace arma;
@@ -27,9 +29,9 @@ double GKOVEstimator::estimate(double *X, double **Y, int sizeOfX, int sizeOfY[2
     xy_data = xy_data.t();
     mat x_data = xy_data.submat(0, 0, 0, xy_data.n_cols - 1);
     mat y_data = xy_data.submat(1, 0, xy_data.n_rows - 1, xy_data.n_cols - 1);
-    NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, BallTree> xy = prepare_search(xy_data);
-    NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, BallTree> x = prepare_search(x_data);
-    NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, BallTree> y = prepare_search(y_data);
+    NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, VPTree> xy = prepare_vp_search(xy_data);
+    NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, BallTree> x = prepare_ball_search(x_data);
+    NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, VPTree> y = prepare_vp_search(y_data);
     Mat<size_t> neighbors;
     mat distances;
     vec d_ixy = zeros(sizeOfX);
@@ -38,6 +40,7 @@ double GKOVEstimator::estimate(double *X, double **Y, int sizeOfX, int sizeOfY[2
     vec n_iy = zeros(sizeOfX);
     vec a_i = zeros(sizeOfX);
     for (int i = 0; i < sizeOfX; i++) {
+        cout << "\rEstimating GKOV " << i << "/" << sizeOfX << endl;
         xy.Search(xy_data.col(i), sizeOfX, neighbors, distances);
         d_ixy[i] = distances(t);
         if (d_ixy[i] == 0)
@@ -98,7 +101,12 @@ void GKOVEstimator::check_dimensions(const int sizeOfX, const int sizeOfY[2]) {
     }
 }
 
-NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, BallTree> GKOVEstimator::prepare_search(mat data) {
-    NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, BallTree> search(data);
+NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, VPTree> GKOVEstimator::prepare_vp_search(mat data) {
+    NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, VPTree> search(std::move(data));
+    return search;
+}
+
+NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, BallTree> GKOVEstimator::prepare_ball_search(mat data) {
+    NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, BallTree> search(std::move(data));
     return search;
 }

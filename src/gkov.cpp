@@ -64,7 +64,6 @@ double GKOVEstimator::estimate(double *X, double **Y, int sizeOfX, int sizeOfY[2
     d_i.clear();
     n_ix.clear();
     n_iy.clear();
-    a_i.clear();
 
     return sum(a_i) / sizeOfX + log(sizeOfX);
 }

@@ -7,7 +7,7 @@
  * @param ranges - Array of ranges, one for each dimension of the histogram as pair representing min and max.
  * @return A HistEstimator object.
  */
-HistEstimator::HistEstimator(int dimensions, int bins[dimensions], pair<double, double> ranges[dimensions]) {
+HistEstimator::HistEstimator(int dimensions, int bins[], pair<double, double> ranges[]) {
     this->histogramDimensions = dimensions;
     this->numOfBinsPerDimension = bins;
     this->totalBins = 1;
@@ -23,6 +23,7 @@ HistEstimator::HistEstimator(int dimensions, int bins[dimensions], pair<double, 
  * Estimates the entropy of the input.
  */
 double HistEstimator::estimate(const double *X, const double *pX, double *Y, int size, int dimensions) {
+    cout << "Estimating entropy with histogram estimator\n";
     auto histogram = build_histogram(Y, size, dimensions);
     double H_Y = pdf_entropy(histogram->pdf, this->totalBins);
     double H_Y_given_X = conditional_entropy(X, pX, Y, histogram, size);
@@ -39,9 +40,9 @@ double HistEstimator::estimate(const double *X, const double *pX, double *Y, int
 Histogram *HistEstimator::build_histogram(double *Y, int size, int dimensions) {
     Histogram *histogram = initialize_histogram();
     if (dimensions == 1) {
-        histogram->gsl_histogram = build_1d_gsl_histogram(Y, size);
+        histogram->gsl_histogram_1d = build_1d_gsl_histogram(Y, size);
     } else if (dimensions == 2) {
-        histogram->gsl_histogram2d = build_2d_gsl_histogram(Y, size);
+        histogram->gsl_histogram_2d = build_2d_gsl_histogram(Y, size);
     } else {
         histogram->histogram = build_nd_histogram(Y, size);
     }
@@ -56,8 +57,8 @@ Histogram *HistEstimator::build_histogram(double *Y, int size, int dimensions) {
 Histogram *HistEstimator::initialize_histogram() const {
     auto *histogram = new Histogram;
     histogram->histogram = new int[this->totalBins];
-    histogram->gsl_histogram = nullptr;
-    histogram->gsl_histogram2d = nullptr;
+    histogram->gsl_histogram_1d = nullptr;
+    histogram->gsl_histogram_2d = nullptr;
     histogram->pdf = new double[this->totalBins];
     histogram->size = this->totalBins;
     histogram->dimensions = this->histogramDimensions;
@@ -123,11 +124,21 @@ int *HistEstimator::build_nd_histogram(const double *Y, int size) {
  * @return The indexes of the bins.
  */
 int *HistEstimator::get_bin_indexes(const double *value) {
-    auto *bin_indexes = new int[this->histogramDimensions];
+    int size = this->histogramDimensions;
+    auto *bin_indexes = new int[size];
     int offset = 0;
     for (int i = 0; i < this->histogramDimensions; i++) {
-        double range = (this->rangesPerDimension[i].second - this->rangesPerDimension[i].first) / this->numOfBinsPerDimension[i];
-        bin_indexes[i] = (int) floor((value[i] - this->rangesPerDimension[i].first) / range) + offset;
+        double range;
+        if (this->rangesPerDimension[i].second < 0)
+            range = (- this->rangesPerDimension[i].second - this->rangesPerDimension[i].first) / this->numOfBinsPerDimension[i];
+        else
+            range = (this->rangesPerDimension[i].second - this->rangesPerDimension[i].first) / this->numOfBinsPerDimension[i];
+        if (value[i] == this->rangesPerDimension[i].second)
+            bin_indexes[i] = this->numOfBinsPerDimension[i] - 1 + offset;
+        else if (value[i] == this->rangesPerDimension[i].first)
+            bin_indexes[i] = offset;
+        else
+            bin_indexes[i] = (int) floor((value[i] - this->rangesPerDimension[i].first) / range) + offset;
         offset += this->numOfBinsPerDimension[i];
     }
     return bin_indexes;
@@ -149,16 +160,16 @@ void HistEstimator::compute_pdf(Histogram *histogram) const {
     else if (histogram->dimensions == 2) {
         for (int i = 0; i < this->numOfBinsPerDimension[0]; i++)
             for (int j = 0; j < this->numOfBinsPerDimension[1]; j++)
-                sum += (int) gsl_histogram2d_get(histogram->gsl_histogram2d, i, j);
+                sum += (int) gsl_histogram2d_get(histogram->gsl_histogram_2d, i, j);
         for (int i = 0; i < this->numOfBinsPerDimension[0]; i++)
             for (int j = 0; j < this->numOfBinsPerDimension[1]; j++)
-                histogram->pdf[i * this->numOfBinsPerDimension[1] + j] = gsl_histogram2d_get(histogram->gsl_histogram2d, i, j) / sum;
+                histogram->pdf[i * this->numOfBinsPerDimension[1] + j] = gsl_histogram2d_get(histogram->gsl_histogram_2d, i, j) / sum;
     }
     else {
         for (int i = 0; i < this->numOfBinsPerDimension[0]; i++)
-            sum += (int) gsl_histogram_get(histogram->gsl_histogram, i);
+            sum += (int) gsl_histogram_get(histogram->gsl_histogram_1d, i);
         for (int i = 0; i < this->numOfBinsPerDimension[0]; i++)
-            histogram->pdf[i] = gsl_histogram_get(histogram->gsl_histogram, i) / sum;
+            histogram->pdf[i] = gsl_histogram_get(histogram->gsl_histogram_1d, i) / sum;
     }
 }
 
@@ -204,11 +215,17 @@ double HistEstimator::conditional_entropy(const double *X, const double *pX, con
                     bin_index += bin_indexes[k] * offset;
                     offset *= this->numOfBinsPerDimension[k];
                 }
-                stepEntropy += histogram->pdf[bin_index] * log2(histogram->pdf[bin_index]);
+                if (histogram->pdf[bin_index] == 0)
+                    stepEntropy += 0;
+                else
+                    stepEntropy += histogram->pdf[bin_index] * log2(histogram->pdf[bin_index]);
+                delete[] values;
+                delete[] bin_indexes;
             }
         }
         entropy += pX[(int) X[i]] * (-stepEntropy);
     }
+    delete[] uniqueX.first;
     return entropy;
 }
 
@@ -228,9 +245,17 @@ pair<double *, int> HistEstimator::unique(const double *X, int size){
         if (i == 0 || sorted[i] != sorted[i - 1])
             uniqueSize++;
     auto *unique = new double[uniqueSize];
+    for (int i = 0; i < uniqueSize; i++)
+        unique[i] = 0;
     unique[0] = sorted[0];
+    int uniqueIndex = 1;
     for (int i = 1; i < size; i++)
-        if (sorted[i] != sorted[i - 1])
-            unique[i] = sorted[i];
+        if (sorted[i] != sorted[i - 1]) {
+            if (uniqueIndex >= uniqueSize)
+                throw runtime_error("uniqueIndex >= uniqueSize");
+            unique[uniqueIndex] = sorted[i];
+            uniqueIndex++;
+        }
+    delete[] sorted;
     return make_pair(unique, uniqueSize);
 }

@@ -7,13 +7,14 @@
 #include <algorithm>
 #include <gsl/gsl_histogram.h>
 #include <gsl/gsl_histogram2d.h>
+#include <iostream>
 
 using namespace std;
 
 struct Histogram {
     int *histogram;
-    gsl_histogram *gsl_histogram;
-    gsl_histogram2d *gsl_histogram2d;
+    gsl_histogram *gsl_histogram_1d;
+    gsl_histogram2d *gsl_histogram_2d;
     double *pdf;
     int size;
     int dimensions;
@@ -22,7 +23,7 @@ struct Histogram {
 
 class HistEstimator {
 public:
-    HistEstimator(int dimensions, int bins[dimensions], pair<double, double> ranges[dimensions]);
+    HistEstimator(int dimensions, int bins[], pair<double, double> ranges[]);
 
     double estimate(const double *X, const double *pX, double *Y, int size, int dimensions);
 

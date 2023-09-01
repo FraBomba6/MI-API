@@ -49,21 +49,20 @@ unsigned int hw(unsigned int x) {
 int main(int argc, char **argv) {
     // Read filename from first argument
     if (argc != 2) {
-        cout << "Usage: ./attack <filename>" << endl;
+        cout << "Usage: ./attack <filename>" << "\n";
         return 1;
     }
     string filename = argv[1];
     if (!filesystem::exists(filename)) {
-        cout << "File " << filename << " does not exist" << endl;
+        cout << "File " << filename << " does not exist" << "\n";
         return 1;
     }
-    cout << "Processing " << filename << endl;
+    cout << "Processing " << filename << "\n";
     // Read the traces
     Trace trace = MIUtils::read_traces(filename);
     int dims[2] = {(int) trace.dims[0], (int) trace.dims[1]};
     auto Y_gkov = MIUtils::to_gkov_format(trace.traces, dims, 2);
-    auto Y_hist = new double[dims[0] * dims[1]];
-    MIUtils::flatten(trace.traces, dims, 2, Y_hist, 0);
+    auto Y_hist = trace.traces;
     // Find min and max values of Y_hist
     double min = Y_hist[0];
     double max = Y_hist[0];
@@ -91,7 +90,7 @@ int main(int argc, char **argv) {
         for (int j = 0; j < dims[0]; j++) {
             X[j] = hw(aes_intermediate((int) trace.pts[j], i));
         }
-        cout << "Processing key " << i << endl;
+        cout << "Processing key " << i << "\n";
         double gkov_estimate = gkov_estimator.estimate(X, Y_gkov, dims[0], dims);
         double hist_estimate = hist_estimator.estimate(X, pX, Y_hist, dims[0], 1);
         json_file << "\t\"" << i << "\": {\n";

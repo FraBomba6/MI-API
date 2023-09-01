@@ -2,9 +2,9 @@
 #define UTILS_H
 
 #include <cstdint>
-#include <string>
 #include <iostream>
 #include <H5Cpp.h>
+#include <cstring>
 
 struct Trace {
     double *traces;
@@ -15,9 +15,7 @@ struct Trace {
 
 class MIUtils {
 public:
-    static void flatten(double *X, int *sizes, int dimensions, double *flattened, int index);
-
-    [[maybe_unused]] static double **to_gkov_format(double *X, int *sizes, int dimensions);
+    [[maybe_unused]] static double **to_gkov_format(double *X, const int *sizes, int dimensions);
 
     static double *compute_distribution(const double *X, const int *sizes, int dimensions);
 

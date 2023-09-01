@@ -25,6 +25,10 @@ private:
     static void check_dimensions(int sizeOfX, const int sizeOfY[2]);
 
     static NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, KDTree> prepare_kd_search(mat data);
+
+    static NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, VPTree> prepare_vp_search(mat data);
+
+    static NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, BallTree> prepare_ball_search(mat data);
 };
 
 #endif

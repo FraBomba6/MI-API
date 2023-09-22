@@ -41,12 +41,6 @@ cmake-build*
 # mlpack
 mlpack
 
-# HDF5
-*.h5
-
-# Data
-data
-
 # Latex build
 report/build
 report/template.tex

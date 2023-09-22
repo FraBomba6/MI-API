@@ -56,14 +56,18 @@ Histogram *HistEstimator::build_histogram(double *Y, int size, int dimensions) {
  */
 Histogram *HistEstimator::initialize_histogram() const {
     auto *histogram = new Histogram;
-    histogram->histogram = new int[this->totalBins];
+    if (this->histogramDimensions > 2)
+        histogram->histogram = new int[this->numOfBinsPerDimension[0]];
+    else
+        histogram->histogram = nullptr;
     histogram->gsl_histogram_1d = nullptr;
     histogram->gsl_histogram_2d = nullptr;
     histogram->pdf = new double[this->totalBins];
     histogram->size = this->totalBins;
     histogram->dimensions = this->histogramDimensions;
     for (int i = 0; i < this->totalBins; i++) {
-        histogram->histogram[i] = 0;
+        if (this->histogramDimensions > 2)
+            histogram->histogram[i] = 0;
         histogram->pdf[i] = 0;
     }
     return histogram;
@@ -150,7 +154,7 @@ int *HistEstimator::get_bin_indexes(const double *value) {
  * @return The pdf.
  */
 void HistEstimator::compute_pdf(Histogram *histogram) const {
-    int sum = 0;
+    double sum = 0;
     if (histogram->dimensions > 2) {
         for (int i = 0; i < histogram->size; i++)
             sum += histogram->histogram[i];
@@ -166,10 +170,10 @@ void HistEstimator::compute_pdf(Histogram *histogram) const {
                 histogram->pdf[i * this->numOfBinsPerDimension[1] + j] = gsl_histogram2d_get(histogram->gsl_histogram_2d, i, j) / sum;
     }
     else {
-        for (int i = 0; i < this->numOfBinsPerDimension[0]; i++)
-            sum += (int) gsl_histogram_get(histogram->gsl_histogram_1d, i);
-        for (int i = 0; i < this->numOfBinsPerDimension[0]; i++)
+        sum = gsl_histogram_sum(histogram->gsl_histogram_1d);
+        for (int i = 0; i < this->numOfBinsPerDimension[0]; i++) {
             histogram->pdf[i] = gsl_histogram_get(histogram->gsl_histogram_1d, i) / sum;
+        }
     }
 }
 
@@ -223,7 +227,7 @@ double HistEstimator::conditional_entropy(const double *X, const double *pX, con
                 delete[] bin_indexes;
             }
         }
-        entropy += pX[(int) X[i]] * (-stepEntropy);
+        entropy += pX[(int) uniqueX.first[i]] * (-stepEntropy);
     }
     delete[] uniqueX.first;
     return entropy;

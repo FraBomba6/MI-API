@@ -1,0 +1,64 @@
+# Ray config file for AWS cluster
+cluster_name: aws-cluster
+max_workers: 30
+idle_timeout_minutes: 120
+
+docker:
+  image: frabomba6/small_project:latest
+  container_name: small_project
+  pull_before_run: True
+  run_options:
+    - --ulimit nofile=65536:65536
+
+provider:
+  type: aws
+  region: us-east-1
+
+available_node_types:
+    ray.head.default:
+        resources: {"CPU": 0}
+        node_config:
+            InstanceType: c6a.xlarge
+            ImageId: ami-053b0d53c279acc90
+            BlockDeviceMappings:
+                - DeviceName: /dev/sda1
+                  Ebs:
+                      VolumeSize: 50
+                      VolumeType: gp2
+
+    ray.worker.default:
+        resources: {"CPU": 2}
+        min_workers: 16
+        node_config:
+            InstanceType: c6a.large
+            ImageId: ami-053b0d53c279acc90
+            BlockDeviceMappings:
+              - DeviceName: /dev/sda1
+                Ebs:
+                  VolumeSize: 20
+                  VolumeType: gp2
+
+head_node_type: ray.head.default
+
+file_mounts: {
+  "/home/ray/small_project_cluster/data/results": "/Users/bomba/Desktop/small_project/data/results",
+  "/home/ray/small_project_cluster/cluster/": "/Users/bomba/Desktop/small_project/cluster"
+}
+
+head_start_ray_commands:
+    - ray stop
+    - ray start --head --port=6379 --object-manager-port=8076 --autoscaling-config=~/ray_bootstrap_config.yaml --dashboard-host=0.0.0.0
+
+worker_start_ray_commands:
+    - ray stop
+    - ray start --address=$RAY_HEAD_IP:6379 --object-manager-port=8076
+
+head_setup_commands:
+    - sudo cmake -S . -B build
+    - sudo cmake --build build -t attack
+
+initialization_commands:
+    - curl -fsSL https://get.docker.com -o get-docker.sh
+    - sudo sh get-docker.sh
+    - sudo usermod -aG docker $USER
+    - sudo systemctl restart docker -f

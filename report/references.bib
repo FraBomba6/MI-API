@@ -1,23 +1,31 @@
-@misc{roy_leakage_2022,
-	title = {Leakage {Certification} based on {Consistent} {MI} {Estimation}},
+@article{gao_estimating_2017,
+	title = {Estimating {Mutual} {Information} for {Discrete}-{Continuous} {Mixtures}},
+	copyright = {arXiv.org perpetual, non-exclusive license},
+	url = {https://arxiv.org/abs/1709.06212},
+	doi = {10.48550/ARXIV.1709.06212},
+	abstract = {Estimating mutual information from observed samples is a basic primitive, useful in several machine learning tasks including correlation mining, information bottleneck clustering, learning a Chow-Liu tree, and conditional independence testing in (causal) graphical models. While mutual information is a well-defined quantity in general probability spaces, existing estimators can only handle two special cases of purely discrete or purely continuous pairs of random variables. The main challenge is that these methods first estimate the (differential) entropies of X, Y and the pair (X;Y) and add them up with appropriate signs to get an estimate of the mutual information. These 3H-estimators cannot be applied in general mixture spaces, where entropy is not well-defined. In this paper, we design a novel estimator for mutual information of discrete-continuous mixtures. We prove that the proposed estimator is consistent. We provide numerical experiments suggesting superiority of the proposed estimator compared to other heuristics of adding small continuous noise to all the samples and applying standard estimators tailored for purely continuous variables, and quantizing the samples and applying standard estimators tailored for purely discrete variables. This significantly widens the applicability of mutual information estimation in real-world applications, where some variables are discrete, some continuous, and others are a mixture between continuous and discrete components.},
+	urldate = {2023-09-21},
+	author = {Gao, Weihao and Kannan, Sreeram and Oh, Sewoong and Viswanath, Pramod},
+	year = {2017},
+	keywords = {FOS: Computer and information sciences, Information Theory (cs.IT), Machine Learning (cs.LG)},
+}
+
+@misc{chowdhury_leakage_2022,
+	title = {Leakage {Certification} {Made} {Simple}},
 	url = {https://eprint.iacr.org/2022/1201},
-	abstract = {The mutual information between two variables is a key metric in the context of side-channel attacks; in particular, it is used to judge the quality of device leakage models. In practice the mutual information can only be estimated, and existing methods in the side channel community are based on density estimation. Estimating the mutual information based on estimating distribution densities is a challenge unless assumptions about the underlying distributions can be made --- this is undesirable in the side channel setting because the underlying distributions are unknown. We suggest a radically different approach to the mutual information estimation in the side channel setting based on a recently proposed \$k\$-Nearest Neighbour estimator. We prove that the mutual information between the key and the observed side channel can be efficiently estimated without the need for any density estimation, even in multivariate settings, and we mathematically characterise the impact of some assumptions/restrictions of previous work on the estimation process. To complement our theoretical results, we offer a wide range of experimental results that compare our proposal with the state-of-the-art estimators used in the side channel community. Finally, we show in experiments the advantages of our proposed method for judging the quality of leakage models, in comparison to the existing techniques.},
-	urldate = {2023-05-02},
-	author = {Roy, Arnab and Chowdhury, Aakash and Oswald, Elisabeth},
+	abstract = {Side channel evaluations benefit from sound characterisations of adversarial leakage models, which are the determining factor for attack success. Two questions are of interest: can we estimate a quantity that captures the ideal adversary (who knows the distributions that are involved in an attack), and can we judge how good one (or several) given leakage models are in relation to the ideal adversary? 
+
+Existing work has led to a proliferation of custom quantities (the hypothetical information HI, perceived informatino PI, training information TI, and learnable information LI). These quantities all provide only (loose) bounds for the ideal adversary, they are slow to estimate, convergence guarantees are only for discrete distributions, and they have bias. 
+
+Our work shows that none of these quantities is necessary: it is possible to characterise the ideal adversary precisely via the mutual information between the device inputs and the observed side channel traces. We achieve this result by a careful characterisation of the distributions in play. We also put forward a mutual information based approach to leakage certification, with a consistent estimator, and demonstrate via a range of case studies that our approach is simpler, faster, and correct.},
+	urldate = {2023-09-18},
+	author = {Chowdhury, Aakash and Roy, Arnab and Brunetta, Carlo and Oswald, Elisabeth},
 	year = {2022},
-	keywords = {Leakage Certification, Mutual Information},
+	note = {Publication info: Preprint.},
+	keywords = {Evaluation, Leakage Certification, Mutual Information Estimation, Side channels},
 }
-@misc{gkov,
-  doi = {10.48550/ARXIV.1709.06212},
-  url = {https://arxiv.org/abs/1709.06212},
-  author = {Gao,  Weihao and Kannan,  Sreeram and Oh,  Sewoong and Viswanath,  Pramod},
-  keywords = {Information Theory (cs.IT),  Machine Learning (cs.LG),  FOS: Computer and information sciences,  FOS: Computer and information sciences},
-  title = {Estimating Mutual Information for Discrete-Continuous Mixtures},
-  publisher = {arXiv},
-  year = {2017},
-  copyright = {arXiv.org perpetual,  non-exclusive license}
-}
-@book{gsl,
+
+@book{galassi_gnu_2009,
 	address = {Bristol},
 	edition = {3. ed},
 	title = {{GNU} scientific library reference manual: for {GSL} version 1.12},
@@ -27,4 +35,31 @@
 	publisher = {Network Theory},
 	editor = {Galassi, Mark},
 	year = {2009},
+}
+
+@article{mlpack2023,
+    title     = {mlpack 4: a fast, header-only C++ machine learning library},
+    author    = {Ryan R. Curtin and Marcus Edel and Omar Shrit and
+                 Shubham Agrawal and Suryoday Basak and James J. Balamuta and
+                 Ryan Birmingham and Kartik Dutt and Dirk Eddelbuettel and
+                 Rishabh Garg and Shikhar Jaiswal and Aakash Kaushik and
+                 Sangyeon Kim and Anjishnu Mukherjee and Nanubala Gnana Sai and
+                 Nippun Sharma and Yashwant Singh Parihar and Roshan Swain and
+                 Conrad Sanderson},
+    journal   = {Journal of Open Source Software},
+    volume    = {8},
+    number    = {82},
+    pages     = {5026},
+    year      = {2023},
+    doi       = {10.21105/joss.05026},
+    url       = {https://doi.org/10.21105/joss.05026}
+}
+
+@misc{moritz2018ray,
+      title={Ray: A Distributed Framework for Emerging AI Applications},
+      author={Philipp Moritz and Robert Nishihara and Stephanie Wang and Alexey Tumanov and Richard Liaw and Eric Liang and Melih Elibol and Zongheng Yang and William Paul and Michael I. Jordan and Ion Stoica},
+      year={2018},
+      eprint={1712.05889},
+      archivePrefix={arXiv},
+      primaryClass={cs.DC}
 }

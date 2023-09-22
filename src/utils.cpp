@@ -107,13 +107,8 @@ void MIUtils::write_traces(const string &filename, double *traces, double *pts, 
  * @return The filename.
  */
 std::string MIUtils::generate_filename(uint32_t n_trc) {
-    char date[20];
-    time_t now = time(nullptr);
-    strftime(date, sizeof(date), "%Y%m%d%H%M%S", localtime(&now));
     char filename[100];
     strcpy(filename, "../data/traces/");
-    strcat(filename, date);
-    strcat(filename, "_");
     strcat(filename, to_string(n_trc).c_str());
     strcat(filename, "_traces.h5");
     return filename;

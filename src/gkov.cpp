@@ -1,5 +1,3 @@
-#include <utility>
-
 #include "../include/gkov.h"
 
 using namespace arma;
@@ -29,29 +27,45 @@ double GKOVEstimator::estimate(double *X, double **Y, int sizeOfX, int sizeOfY[2
     xy_data = xy_data.t();
     mat x_data = xy_data.submat(0, 0, 0, xy_data.n_cols - 1);
     mat y_data = xy_data.submat(1, 0, xy_data.n_rows - 1, xy_data.n_cols - 1);
-    auto xy = prepare_vp_search(xy_data);
-    auto x = prepare_ball_search(x_data);
-    auto y = prepare_vp_search(y_data);
+    auto xy_neighbors = prepare_ball_search(xy_data);
+    auto xy_distance = prepare_ball_range_search(xy_data);
+    auto x = prepare_ball_range_search(x_data);
+    auto y = prepare_ball_range_search(y_data);
+
     Mat<size_t> neighbors;
+    std::vector<std::vector<size_t>> range_neighbors;
     mat distances;
+    std::vector<std::vector<double>> range_distances;
     vec d_ixy = zeros(sizeOfX);
     vec d_i = zeros(sizeOfX);
     vec n_ix = zeros(sizeOfX);
     vec n_iy = zeros(sizeOfX);
     vec a_i = zeros(sizeOfX);
     for (int i = 0; i < sizeOfX; i++) {
+        xy_neighbors.Search(xy_data.col(i), t + 1, neighbors, distances);
+        d_ixy[i] = distances(t, 0);
+    }
+    for (int i = 0; i < sizeOfX; i++) {
         cout << "Estimating GKOV " << i+1 << "/" << sizeOfX  << "\r";
-        xy.Search(xy_data.col(i), sizeOfX, neighbors, distances);
-        d_ixy[i] = distances(t);
-        if (d_ixy[i] == 0)
-            d_i[i] = ((uvec) find(distances == 0)).n_elem;
+        if (d_ixy[i] == 0) {
+            xy_distance.Search(xy_data.col(i), Range(0, 1e-15), range_neighbors, range_distances);
+            d_i[i] = range_neighbors.size();
+        }
         else
             d_i[i] = t;
-        x.Search(x_data.col(i), sizeOfX, neighbors, distances);
-        n_ix[i] = ((uvec) find(distances <= d_i[i])).n_elem;
-        y.Search(y_data.col(i), sizeOfX, neighbors, distances);
-        n_iy[i] = ((uvec) find(distances <= d_i[i])).n_elem;
-        a_i[i] = digamma(d_i[i]) - log(n_ix[i] + 1) - log(n_iy[i] + 1);
+        x.Search(x_data.col(i), Range(0, d_ixy[i]), range_neighbors, range_distances);
+        for(int j = 0; j < range_neighbors.size(); j++)
+            if (range_neighbors[j].size() > 0)
+                n_ix[i] += range_neighbors[j].size();
+        range_neighbors.clear();
+        range_distances.clear();
+        y.Search(y_data.col(i), Range(0, d_ixy[i]), range_neighbors, range_distances);
+        for(int j = 0; j < range_neighbors.size(); j++)
+            if (range_neighbors[j].size() > 0)
+                n_iy[i] += range_neighbors[j].size();
+        range_neighbors.clear();
+        range_distances.clear();
+        a_i[i] = (digamma(d_i[i]) - log(n_ix[i]) - log(n_iy[i]) + log(sizeOfX)) / sizeOfX;
     }
     cout << "\n";
 
@@ -65,7 +79,7 @@ double GKOVEstimator::estimate(double *X, double **Y, int sizeOfX, int sizeOfY[2
     n_ix.clear();
     n_iy.clear();
 
-    return sum(a_i) / sizeOfX + log(sizeOfX);
+    return sum(a_i);
 }
 
 /**
@@ -113,17 +127,12 @@ void GKOVEstimator::check_dimensions(const int sizeOfX, const int sizeOfY[2]) {
     }
 }
 
-NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, KDTree> GKOVEstimator::prepare_kd_search(mat data) {
-    NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, KDTree> search(data);
-    return search;
-}
-
-NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, VPTree> GKOVEstimator::prepare_vp_search(mat data) {
-    NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, VPTree> search(data);
-    return search;
-}
-
 NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, BallTree> GKOVEstimator::prepare_ball_search(mat data) {
     NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, BallTree> search(data);
+    return search;
+}
+
+RangeSearch<ChebyshevDistance, mat, BallTree> GKOVEstimator::prepare_ball_range_search(mat data) {
+    RangeSearch<ChebyshevDistance, mat, BallTree> search(data);
     return search;
 }

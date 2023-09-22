@@ -44,6 +44,6 @@ unsigned int hw(unsigned int x) {
 
 int main() {
     Simulator sim;
-    for (int i = 10; i < 10e7; i *= 5)
+    for (int i = 10; i < 10e6; i *= 2)
         sim.simulate_traces_1d(i, sim.generate_random_byte(), "gauss", 1, aes_intermediate, hw);
 }

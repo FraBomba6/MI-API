@@ -1,0 +1,7 @@
+.idea
+Dockerfile
+.dockerignore
+report
+.gitignore
+test
+cmake-build-debug

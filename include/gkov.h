@@ -1,8 +1,10 @@
 #ifndef GKOV_H
 #define GKOV_H
 
+#include <utility>
 #include <mlpack/core.hpp>
 #include <mlpack/methods/neighbor_search/neighbor_search.hpp>
+#include <mlpack/methods/range_search/range_search.hpp>
 #include <boost/math/special_functions/digamma.hpp>
 
 using namespace arma;
@@ -24,11 +26,9 @@ private:
 
     static void check_dimensions(int sizeOfX, const int sizeOfY[2]);
 
-    static NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, KDTree> prepare_kd_search(mat data);
-
-    static NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, VPTree> prepare_vp_search(mat data);
-
     static NeighborSearch<NearestNeighborSort, ChebyshevDistance, mat, BallTree> prepare_ball_search(mat data);
+
+    static RangeSearch<ChebyshevDistance, mat, BallTree> prepare_ball_range_search(mat data);
 };
 
 #endif

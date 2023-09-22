@@ -13,7 +13,7 @@ target_link_libraries(simulator utils)
 
 add_executable(simulation test/simulate.cpp)
 target_link_libraries(simulation simulator utils)
-add_executable(attack test/attack.cpp)
+add_executable(attack cluster/attack_cluster.cpp)
 target_link_libraries(attack gkov hist simulator utils)
 
 find_package(MLPACK REQUIRED)
